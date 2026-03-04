@@ -1,58 +1,135 @@
 ﻿using System;
-using System.IO.Pipelines;
-using System.Linq;
+using System.Collections;
+using System.Collections.Generic;
+using System.Text;
 
 namespace Lab1
 {
-    public class Magazine
+    public class Magazine : Edition, IRateAndCopy
     {
-        public string Title { get; set; }
-        public Frequency Frequency { get; set; }
-        public DateTime PublicationDate { get; set; }
-        public int Circulation { get; set; }
+        private Frequency frequency;
+        private ArrayList editors;
+        private ArrayList articles;
 
-        private Article[] Articles;
-
-        public Magazine(string title, Frequency frequency, DateTime publicationDate, int circulation, Article[] articles)
+        public Magazine(string title, DateTime releaseDate, int circulation, Frequency frequency)
+            : base(title, releaseDate, circulation)
         {
-            Title = title;
-            Frequency = frequency;
-            PublicationDate = publicationDate;
-            Circulation = circulation;
-            Articles = articles ?? new Article[0];
+            this.frequency = frequency;
+            editors = new ArrayList();
+            articles = new ArrayList();
         }
 
-        public Magazine() : this("NoTitle", Frequency.Monthly, DateTime.Today, 0, new Article[0]) { }
+        public Magazine() : this("NoTitle", DateTime.Today, 1, Frequency.Monthly) { }
 
-        public double AverageRating => Articles.Length == 0 ? 0.0 : Articles.Average(a => a.Rating);
+        public Frequency Frequency
+        {
+            get => frequency;
+            set => frequency = value;
+        }
 
-        public bool this[Frequency freq] => Frequency == freq;
+        public ArrayList Articles
+        {
+            get => articles;
+            set => articles = value;
+        }
+
+        public ArrayList Editors
+        {
+            get => editors;
+            set => editors = value;
+        }
+
+        public double Rating => AverageRating;
+
+        public double AverageRating
+        {
+            get
+            {
+                if (articles.Count == 0) return 0;
+
+                double sum = 0;
+                foreach (Article a in articles)
+                    sum += a.Rating;
+
+                return sum / articles.Count;
+            }
+        }
+
+        public Edition EditionData
+        {
+            get => new Edition(Title, ReleaseDate, Circulation);
+            init
+            {
+                title = value.Title;
+                releaseDate = value.ReleaseDate;
+                circulation = value.Circulation;
+            }
+        }
 
         public void AddArticles(params Article[] newArticles)
         {
-            int oldLength = Articles.Length;
-            int newLength = oldLength + newArticles.Length;
+            articles.AddRange(newArticles);
+        }
 
-            Article[] temp = new Article[newLength];
+        public void AddEditors(params Person[] newEditors)
+        {
+            editors.AddRange(newEditors);
+        }
 
-            for (int i = 0; i < oldLength; i++)
-                temp[i] = Articles[i];
+        public override object DeepCopy()
+        {
+            Magazine copy = new Magazine(Title, ReleaseDate, Circulation, frequency);
 
-            for (int i = 0; i < newArticles.Length; i++)
-                temp[oldLength + i] = newArticles[i];
+            foreach (Person e in editors)
+                copy.editors.Add(e.DeepCopy());
 
-            Articles = temp;
+            foreach (Article a in articles)
+                copy.articles.Add(a.DeepCopy());
+
+            return copy;
         }
 
         public override string ToString()
         {
-            string articlesStr = Articles.Length > 0 ? string.Join("; ", Articles) : "No articles";
-            return $"Title: {Title}, Frequency: {Frequency}, PublicationDate: {PublicationDate.ToShortDateString()}, Circulation: {Circulation}, Articles: {articlesStr}";
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine($"Magazine: {Title}, Frequency: {Frequency}, Released: {ReleaseDate:yyyy-MM-dd}, Circulation: {Circulation}");
+
+            sb.Append("Editors: ");
+            if (editors.Count > 0)
+                sb.AppendLine(string.Join("; ", editors.ToArray()));
+            else
+                sb.AppendLine("No editors");
+
+            sb.Append("Articles: ");
+            if (articles.Count > 0)
+                sb.AppendLine(string.Join("; ", articles.ToArray()));
+            else
+                sb.AppendLine("No articles");
+
+            return sb.ToString();
         }
 
         public virtual string ToShortString()
         {
-            return $"Title: {Title}, Frequency: {Frequency}, PublicationDate: {PublicationDate.ToShortDateString()}, Circulation: {Circulation}, Average Rating: {AverageRating:F2}";
+            return $"Magazine: {Title}, Frequency: {Frequency}, Released: {ReleaseDate:yyyy-MM-dd}, Circulation: {Circulation}, Average Rating: {AverageRating:F2}";
+        }
+
+        public IEnumerable ArticlesWithRatingAbove(double minRating)
+        {
+            foreach (Article a in articles)
+            {
+                if (a.Rating > minRating)
+                    yield return a;
+            }
+        }
+
+        public IEnumerable ArticlesWithTitleContaining(string substring)
+        {
+            foreach (Article a in articles)
+            {
+                if (a.Title.Contains(substring, StringComparison.OrdinalIgnoreCase))
+                    yield return a;
+            }
         }
     }
 }

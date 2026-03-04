@@ -7,196 +7,69 @@ namespace Lab1
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Write array size:");
-            string sizeArray = Console.ReadLine();
+            Console.WriteLine("1. Edition: Equals, references, hash codes");
+            Edition ed1 = new Edition("Science Weekly", new DateTime(2026, 1, 15), 5000);
+            Edition ed2 = new Edition("Science Weekly", new DateTime(2026, 1, 15), 5000);
 
-            int[] array = sizeArray.Split(' ').Select(int.Parse).ToArray();
+            Console.WriteLine($"ReferenceEquals: {ReferenceEquals(ed1, ed2)}");
+            Console.WriteLine($"Equals: {ed1.Equals(ed2)}");
+            Console.WriteLine($"==: {ed1 == ed2}");
+            Console.WriteLine($"Hash ed1: {ed1.GetHashCode()}");
+            Console.WriteLine($"Hash ed2: {ed2.GetHashCode()}");
 
-            int nRows = array[0];
-            int nCols = array[1];
-
-            Person[] oneDimensional = new Person[nRows * nCols];
-            Person[,] twoDimensional = new Person[nRows, nCols];
-            Person[][] jaggedArray = new Person[nRows][];
-            Person[][] jaggedDifferent = JaggedArray(nRows * nCols);
-
-            for (int i = 0; i < oneDimensional.Length; i++)
-                oneDimensional[i] = new Person();
-
-            for (int i = 0; i < nRows; i++)
-                for (int j = 0; j < nCols; j++)
-                    twoDimensional[i, j] = new Person();
-
-            for (int i = 0; i < nRows; i++)
+            Console.WriteLine("\n2. Edition: invalid Circulation ");
+            try
             {
-                jaggedArray[i] = new Person[nCols];
-                for (int j = 0; j < nCols; j++)
-                    jaggedArray[i][j] = new Person();
+                Edition bad = new Edition("Bad Edition", DateTime.Today, -10);
+            }
+            catch (ArgumentException ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
             }
 
-            Console.WriteLine("Succesfull initialized ");
-            Console.WriteLine($"nRows = {nRows}, nCols = {nCols}");
+            Console.WriteLine("\n3. Magazine with articles and editors ");
+            Magazine mag = new Magazine("Tech Today", new DateTime(2026, 3, 1), 10000, Frequency.Monthly);
 
-            int startOne = Environment.TickCount;
-            for (int i = 0; i < oneDimensional.Length; i++)
-                oneDimensional[i].Year = 2026;
-            Console.WriteLine($"One-dimensional: {Environment.TickCount - startOne} ms");
+            mag.AddEditors(
+                new Person("Ivan", "Petrov", new DateTime(1980, 5, 12)),
+                new Person("Olena", "Koval", new DateTime(1990, 8, 25))
+            );
 
-            int startTwo = Environment.TickCount;
-            for (int i = 0; i < nRows; i++)
-                for (int j = 0; j < nCols; j++)
-                    twoDimensional[i, j].Year = 2026;
-            Console.WriteLine($"Two-dimensional: {Environment.TickCount - startTwo} ms");
+            mag.AddArticles(
+                new Article(new Person("Alice", "Smith", new DateTime(1985, 5, 10)), "Quantum Computing Advances", 9.2),
+                new Article(new Person("Bob", "Jones", new DateTime(1990, 3, 22)), "AI in Medicine", 7.5),
+                new Article(new Person("Carol", "White", new DateTime(1978, 11, 5)), "Space Exploration Today", 8.8),
+                new Article(new Person("Dan", "Brown", new DateTime(1995, 1, 30)), "Computing in Education", 6.0)
+            );
 
-            int startJagged = Environment.TickCount;
-            for (int i = 0; i < nRows; i++)
-                for (int j = 0; j < nCols; j++)
-                    jaggedArray[i][j].Year = 2026;
-            Console.WriteLine($"Jagged equal: {Environment.TickCount - startJagged} ms");
+            Console.WriteLine(mag.ToString());
 
-            int startJaggedDiff = Environment.TickCount;
-            for (int i = 0; i < jaggedDifferent.Length; i++)
-                for (int j = 0; j < jaggedDifferent[i].Length; j++)
-                    jaggedDifferent[i][j].Year = 2026;
-            Console.WriteLine($"Jagged different: {Environment.TickCount - startJaggedDiff} ms");
+            Console.WriteLine(" 4. EditionData property ");
+            Console.WriteLine(mag.EditionData);
 
-            // MAGAZINE 
-            Console.WriteLine("\n1. Magazine - ToShortString");
-            Magazine mag = new Magazine();
-            Console.WriteLine(mag.ToShortString());
+            Console.WriteLine("\n5. DeepCopy test ");
+            Magazine copy = (Magazine)mag.DeepCopy();
 
-            Console.WriteLine("\n2. Indexer:");
-            Console.WriteLine(mag[Frequency.Weekly]);
-            Console.WriteLine(mag[Frequency.Monthly]);
-            Console.WriteLine(mag[Frequency.Yearly]);
-
-            Console.WriteLine("\n3. Set properties:");
-            mag.Title = "Science Today";
             mag.Frequency = Frequency.Weekly;
-            mag.PublicationDate = new DateTime(2026, 2, 23);
-            mag.Circulation = 5000;
-            Console.WriteLine(mag);
+            mag.AddArticles(new Article(new Person("New", "Author", DateTime.Today), "New Article", 10.0));
+            mag.AddEditors(new Person("Extra", "Editor", DateTime.Today));
 
-            Console.WriteLine("\n4. Add articles:");
-            Article a1 = new Article(new Person("Alice", "Smith", new DateTime(1985, 5, 10)), "Quantum Physics", 9.0);
-            Article a2 = new Article(new Person("Bob", "Jones", new DateTime(1990, 3, 22)), "AI in Medicine", 8.5);
-            Article a3 = new Article(new Person("Carol", "White", new DateTime(1978, 11, 5)), "Space Exploration", 9.5);
+            Console.WriteLine(" Original (after changes) ");
+            Console.WriteLine(mag.ToString());
+            Console.WriteLine("Copy (should be unchanged) ");
+            Console.WriteLine(copy.ToString());
 
-            mag.AddArticles(a1, a2, a3);
-            Console.WriteLine(mag);
-
-            // ARTICLE TEST
-
-            Console.WriteLine("\n5. Article arrays test");
-
-            int artRows = 500;
-            int artCols = 500;
-            int total = artRows * artCols;
-
-            Article[] artOne = new Article[total];
-            Article[,] artTwo = new Article[artRows, artCols];
-            Article[][] artJagged = new Article[artRows][];
-            Article[][] artJaggedDiff = CreateJaggedArticles(total);
-
-            for (int i = 0; i < total; i++)
-                artOne[i] = new Article();
-
-            for (int i = 0; i < artRows; i++)
-                for (int j = 0; j < artCols; j++)
-                    artTwo[i, j] = new Article();
-
-            for (int i = 0; i < artRows; i++)
+            Console.WriteLine("6. Articles with rating > 8.0 ");
+            foreach (Article a in copy.ArticlesWithRatingAbove(8.0))
             {
-                artJagged[i] = new Article[artCols];
-                for (int j = 0; j < artCols; j++)
-                    artJagged[i][j] = new Article();
+                Console.WriteLine(a);
             }
 
-            int tStart = Environment.TickCount;
-            for (int i = 0; i < total; i++)
-                artOne[i].Rating = 5;
-            Console.WriteLine($"1D: {Environment.TickCount - tStart} ms");
-
-            tStart = Environment.TickCount;
-            for (int i = 0; i < artRows; i++)
-                for (int j = 0; j < artCols; j++)
-                    artTwo[i, j].Rating = 5;
-            Console.WriteLine($"2D: {Environment.TickCount - tStart} ms");
-
-            tStart = Environment.TickCount;
-            for (int i = 0; i < artRows; i++)
-                for (int j = 0; j < artCols; j++)
-                    artJagged[i][j].Rating = 5;
-            Console.WriteLine($"Jagged equal: {Environment.TickCount - tStart} ms");
-
-            tStart = Environment.TickCount;
-            for (int i = 0; i < artJaggedDiff.Length; i++)
-                for (int j = 0; j < artJaggedDiff[i].Length; j++)
-                    artJaggedDiff[i][j].Rating = 5;
-            Console.WriteLine($"Jagged diff: {Environment.TickCount - tStart} ms");
-        }
-
-        static Person[][] JaggedArray(int totalElements)
-        {
-            int current = 0;
-            int rows = 0;
-
-            while (current < totalElements)
+            Console.WriteLine("\n7. Articles with 'Computing' in title ");
+            foreach (Article a in copy.ArticlesWithTitleContaining("Computing"))
             {
-                rows++;
-                current += rows;
+                Console.WriteLine(a);
             }
-
-            Person[][] array = new Person[rows][];
-            current = 0;
-
-            for (int i = 0; i < rows; i++)
-            {
-                int length = Math.Min(i + 1, totalElements - current);
-                array[i] = new Person[length];
-
-                for (int j = 0; j < length; j++)
-                {
-                    array[i][j] = new Person();
-                    current++;
-                }
-
-                if (current >= totalElements)
-                    break;
-            }
-
-            return array;
-        }
-        static Article[][] CreateJaggedArticles(int totalElements)
-        {
-            int current = 0;
-            int rows = 0;
-
-            while (current < totalElements)
-            {
-                rows++;
-                current += rows;
-            }
-
-            Article[][] array = new Article[rows][];
-            current = 0;
-
-            for (int i = 0; i < rows; i++)
-            {
-                int length = Math.Min(i + 1, totalElements - current);
-                array[i] = new Article[length];
-
-                for (int j = 0; j < length; j++)
-                {
-                    array[i][j] = new Article();
-                    current++;
-                }
-
-                if (current >= totalElements)
-                    break;
-            }
-
-            return array;
         }
     }
 }

@@ -4,24 +4,33 @@ using System.Text;
 
 namespace Lab1
 {
-    public class Article
+    public class Article : IRateAndCopy
     {
-        public Person Person { get; set; }
+        public Person Author { get; set; }
         public string Title { get; set; }
         public double Rating { get; set; }
 
-
-        public Article(Person person, string title, double rating)
+        public Article(Person author, string title, double rating)
         {
-            Person = person;
+            Author = author;
             Title = title;
             Rating = rating;
         }
+
         public Article() : this(new Person(), "NoTitle", 0.0) { }
 
         public override string ToString()
         {
-            return $"Article: {Title}, Author: {Person}, Rating: {Rating}";
+            return $"Article: {Title}, Author: {Author}, Rating: {Rating}";
+        }
+
+        public virtual object DeepCopy()
+        {
+            return new Article(
+                (Person)Author.DeepCopy(),
+                Title,
+                Rating
+            );
         }
     }
 }
