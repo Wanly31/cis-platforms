@@ -57,7 +57,7 @@ namespace Lab1
 
         public Edition EditionData
         {
-            get => new Edition(Title, ReleaseDate, Circulation);
+            get => this;
             init
             {
                 title = value.Title;
@@ -65,27 +65,38 @@ namespace Lab1
                 circulation = value.Circulation;
             }
         }
-
+        
         public void AddArticles(params Article[] newArticles)
         {
-            articles.AddRange(newArticles);
+            if (newArticles != null)
+            {
+                articles.AddRange(newArticles);
+            }
         }
 
         public void AddEditors(params Person[] newEditors)
         {
-            editors.AddRange(newEditors);
+            if (newEditors != null)
+            {
+                editors.AddRange(newEditors);
+            }
         }
 
         public override object DeepCopy()
         {
             Magazine copy = new Magazine(Title, ReleaseDate, Circulation, frequency);
 
-            foreach (Person e in editors)
-                copy.editors.Add(e.DeepCopy());
+            if (editors != null)
+            {
+                foreach (Person e in editors)
+                    copy.editors.Add(e.DeepCopy());
+            }
 
-            foreach (Article a in articles)
-                copy.articles.Add(a.DeepCopy());
-
+            if (articles != null)
+            {
+                foreach (Article a in articles)
+                    copy.articles.Add(a.DeepCopy());
+            }
             return copy;
         }
 
@@ -116,19 +127,26 @@ namespace Lab1
 
         public IEnumerable ArticlesWithRatingAbove(double minRating)
         {
-            foreach (Article a in articles)
+            //null
+            if (articles != null)
             {
-                if (a.Rating > minRating)
-                    yield return a;
+                foreach (Article a in articles)
+                {
+                    if (a.Rating > minRating)
+                        yield return a;
+                }
             }
         }
 
         public IEnumerable ArticlesWithTitleContaining(string substring)
         {
-            foreach (Article a in articles)
+            if (articles != null)
             {
-                if (a.Title.Contains(substring, StringComparison.OrdinalIgnoreCase))
-                    yield return a;
+                foreach (Article a in articles)
+                {
+                    if (a.Title.Contains(substring, StringComparison.OrdinalIgnoreCase))
+                        yield return a;
+                }
             }
         }
     }

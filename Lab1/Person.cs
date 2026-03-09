@@ -47,7 +47,8 @@
 
         public virtual object DeepCopy()
         {
-            return new Person(FirstName, LastName, BirthDate);
+            //return new Person(FirstName, LastName, BirthDate);
+            return MemberwiseClone();
         }
 
         public override bool Equals(object? obj)
