@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using static System.Net.WebRequestMethods;
-
-namespace Lab1
+﻿namespace Lab1
 {
 
-    public class Edition
+    public class Edition : IComparable, IComparer<Edition>
     {
         public Edition(string title, DateTime releaseDate, int circulation)
         {
@@ -83,6 +78,38 @@ namespace Lab1
         public override string ToString()
         {
             return $"{Title}, released on {ReleaseDate:yyyy-MM-dd}, circulation: {Circulation}";
+        }
+
+        public int CompareTo(object? obj)
+        {
+            if (obj == null)
+            {
+                return 1;
+            }
+            if (obj is Edition other)
+            {
+                return this.Title.CompareTo(other.Title);
+            }
+
+            throw new ArgumentException("Object is not an Edition");
+        }
+
+        public int Compare(Edition? x, Edition? y)
+        {
+            if (x == null && y == null) 
+            { 
+                return 0; 
+            }
+            if (x == null)
+            { 
+                return -1; 
+            }
+            if (y == null) 
+            { 
+                return 1; 
+            }
+
+            return DateTime.Compare(x.ReleaseDate, y.ReleaseDate);
         }
     }
 

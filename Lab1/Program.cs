@@ -1,75 +1,106 @@
-﻿using System;
-using System.Linq;
-
-namespace Lab1
+﻿namespace Lab1
 {
     public class Program
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("1. Edition: Equals, references, hash codes");
-            Edition ed1 = new Edition("Science Weekly", new DateTime(2026, 1, 15), 5000);
-            Edition ed2 = new Edition("Science Weekly", new DateTime(2026, 1, 15), 5000);
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
+            Console.InputEncoding = System.Text.Encoding.UTF8;
 
-            Console.WriteLine($"ReferenceEquals: {ReferenceEquals(ed1, ed2)}");
-            Console.WriteLine($"Equals: {ed1.Equals(ed2)}");
-            Console.WriteLine($"==: {ed1 == ed2}");
-            Console.WriteLine($"Hash ed1: {ed1.GetHashCode()}");
-            Console.WriteLine($"Hash ed2: {ed2.GetHashCode()}");
+            Console.WriteLine("1. Тестування MagazineCollection");
+            MagazineCollection collection = new MagazineCollection();
+            collection.AddDefaults();
+            
+            Magazine customMag = new Magazine("Custom Magazine", new DateTime(2025, 1, 1), 750, Frequency.Weekly);
+            customMag.AddArticles(new Article(new Person("Super", "Author", DateTime.Today), "Cool article", 5.0));
+            collection.AddMagazines(customMag);
 
-            Console.WriteLine("\n2. Edition: invalid Circulation ");
-            try
+            Console.WriteLine("Початкова колекція:");
+            Console.WriteLine(collection.ToString());
+
+            Console.WriteLine("\nСортування за назвою (Title):");
+            collection.SortByTitle();
+            Console.WriteLine(collection.ToString());
+
+            Console.WriteLine("\nСортування за датою виходу (ReleaseDate):");
+            collection.SortByDate();
+            Console.WriteLine(collection.ToString());
+
+            Console.WriteLine("\nСортування за тиражем (Circulation):");
+            collection.SortByCirculation();
+            Console.WriteLine(collection.ToString());
+
+            Console.WriteLine("\n2. Перевірка LINQ методів");
+            Console.WriteLine($"Максимальний середній рейтинг: {collection.MaxAverageRating}");
+
+            Console.WriteLine("\nЖурнали, що виходять щомісяця (Monthly):");
+            foreach (var m in collection.MonthlyMagazines)
             {
-                Edition bad = new Edition("Bad Edition", DateTime.Today, -10);
-            }
-            catch (ArgumentException ex)
-            {
-                Console.WriteLine($"Error: {ex.Message}");
-            }
-
-            Console.WriteLine("\n3. Magazine with articles and editors ");
-            Magazine mag = new Magazine("Tech Today", new DateTime(2026, 3, 1), 10000, Frequency.Monthly);
-
-            mag.AddEditors(
-                new Person("Ivan", "Petrov", new DateTime(1980, 5, 12)),
-                new Person("Olena", "Koval", new DateTime(1990, 8, 25))
-            );
-
-            mag.AddArticles(
-                new Article(new Person("Alice", "Smith", new DateTime(1985, 5, 10)), "Quantum Computing Advances", 9.2),
-                new Article(new Person("Bob", "Jones", new DateTime(1990, 3, 22)), "AI in Medicine", 7.5),
-                new Article(new Person("Carol", "White", new DateTime(1978, 11, 5)), "Space Exploration Today", 8.8),
-                new Article(new Person("Dan", "Brown", new DateTime(1995, 1, 30)), "Computing in Education", 6.0)
-            );
-
-            Console.WriteLine(mag.ToString());
-
-            Console.WriteLine(" 4. EditionData property ");
-            Console.WriteLine(mag.EditionData);
-
-            Console.WriteLine("\n5. DeepCopy test ");
-            Magazine copy = (Magazine)mag.DeepCopy();
-
-            mag.Frequency = Frequency.Weekly;
-            mag.AddArticles(new Article(new Person("New", "Author", DateTime.Today), "New Article", 10.0));
-            mag.AddEditors(new Person("Extra", "Editor", DateTime.Today));
-
-            Console.WriteLine(" Original (after changes) ");
-            Console.WriteLine(mag.ToString());
-            Console.WriteLine("Copy (should be unchanged) ");
-            Console.WriteLine(copy.ToString());
-
-            Console.WriteLine("6. Articles with rating > 8.0 ");
-            foreach (Article a in copy.ArticlesWithRatingAbove(8.0))
-            {
-                Console.WriteLine(a);
+                Console.WriteLine(m.ToShortString());
             }
 
-            Console.WriteLine("\n7. Articles with 'Computing' in title ");
-            foreach (Article a in copy.ArticlesWithTitleContaining("Computing"))
+            Console.WriteLine("\nЖурнали з рейтингом >= 4.0:");
+            var grouped = collection.RatingGroup(4.0);
+            foreach (var m in grouped)
             {
-                Console.WriteLine(a);
+                Console.WriteLine(m.ToShortString());
             }
+
+            Console.WriteLine("\n3. Тестування часу у TestCollections ");
+            Console.WriteLine("Напишіть кількість елементів для генерації:");
+
+            int number;
+            while (!int.TryParse(Console.ReadLine(), out number) || number <= 0)
+            {
+                Console.WriteLine("Помилка! Введіть додатнє ціле число:");
+            }
+
+            Console.WriteLine($"Створюємо об'єкт TestCollections на {number} елементів");
+            var testCollections = new TestCollections(number);
+            System.Diagnostics.Stopwatch watch = new System.Diagnostics.Stopwatch();
+
+            Magazine firstMag = TestCollections.GenerateMagazine(0);
+            Magazine centerMag = TestCollections.GenerateMagazine(number / 2);
+            Magazine lastMag = TestCollections.GenerateMagazine(number - 1);
+            Magazine notExistingMag = TestCollections.GenerateMagazine(number + 100);
+
+            Magazine[] magsToTest = { firstMag, centerMag, lastMag, notExistingMag };
+            string[] names = { "ПЕРШИЙ", "ЦЕНТРАЛЬНИЙ", "ОСТАННІЙ", "НЕ ІСНУЄ" };
+
+            for (int i = 0; i < 4; i++)
+            {
+                Magazine currentMag = magsToTest[i];
+                Edition currentKey = currentMag.EditionData;
+                string currentStrKey = currentKey.ToString();
+
+                Console.WriteLine($"\nШукаємо елемент '{names[i]}' ");
+
+                watch.Restart();
+                testCollections.FindInListKeys(currentKey);
+                watch.Stop();
+                Console.WriteLine($"List<Edition>: {watch.ElapsedTicks} тіків");
+
+                watch.Restart();
+                testCollections.FindInListStrings(currentStrKey);
+                watch.Stop();
+                Console.WriteLine($"List<string>: {watch.ElapsedTicks} тіків");
+
+                watch.Restart();
+                testCollections.FindInDictByKey(currentKey);
+                watch.Stop();
+                Console.WriteLine($"Dictionary<Edition, Magazine> (key): {watch.ElapsedTicks} тіків");
+
+                watch.Restart();
+                testCollections.FindInDictByStringKey(currentStrKey);
+                watch.Stop();
+                Console.WriteLine($"Dictionary<string, Magazine> (key): {watch.ElapsedTicks} тіків");
+
+                watch.Restart();
+                testCollections.FindInDictByValue(currentMag);
+                watch.Stop();
+                Console.WriteLine($"Dictionary (value): {watch.ElapsedTicks} тіків");
+            }
+
         }
     }
 }

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections;
 using System.Text;
 
 namespace Lab1
@@ -8,15 +6,15 @@ namespace Lab1
     public class Magazine : Edition, IRateAndCopy
     {
         private Frequency frequency;
-        private ArrayList editors;
-        private ArrayList articles;
+        private List<Person> editors;
+        private List<Article> articles;
 
         public Magazine(string title, DateTime releaseDate, int circulation, Frequency frequency)
             : base(title, releaseDate, circulation)
         {
             this.frequency = frequency;
-            editors = new ArrayList();
-            articles = new ArrayList();
+            editors = new List<Person>();
+            articles = new List<Article>();
         }
 
         public Magazine() : this("NoTitle", DateTime.Today, 1, Frequency.Monthly) { }
@@ -27,13 +25,13 @@ namespace Lab1
             set => frequency = value;
         }
 
-        public ArrayList Articles
+        public List<Article> Articles
         {
             get => articles;
             set => articles = value;
         }
 
-        public ArrayList Editors
+        public List<Person> Editors
         {
             get => editors;
             set => editors = value;
@@ -57,7 +55,7 @@ namespace Lab1
 
         public Edition EditionData
         {
-            get => this;
+            get => new Edition(Title, ReleaseDate, Circulation);
             init
             {
                 title = value.Title;
@@ -89,13 +87,13 @@ namespace Lab1
             if (editors != null)
             {
                 foreach (Person e in editors)
-                    copy.editors.Add(e.DeepCopy());
+                    copy.editors.Add((Person)e.DeepCopy());
             }
 
             if (articles != null)
             {
                 foreach (Article a in articles)
-                    copy.articles.Add(a.DeepCopy());
+                    copy.articles.Add((Article)a.DeepCopy());
             }
             return copy;
         }
