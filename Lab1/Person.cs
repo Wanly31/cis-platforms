@@ -23,7 +23,7 @@
             set => BirthDate = new DateTime(value, BirthDate.Month, BirthDate.Day);
         }
 
-        public static bool operator ==(Person p1, Person p2)
+        public static bool operator == (Person p1, Person p2)
         {
             if(ReferenceEquals(p1, p2))
             {

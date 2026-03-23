@@ -1,4 +1,4 @@
-﻿namespace Lab1
+namespace Lab1
 {
     public class Program
     {
@@ -75,6 +75,7 @@
 
                 Console.WriteLine($"\nШукаємо елемент '{names[i]}' ");
 
+                // --- Стандартні колекції ---
                 watch.Restart();
                 testCollections.FindInListKeys(currentKey);
                 watch.Stop();
@@ -99,6 +100,48 @@
                 testCollections.FindInDictByValue(currentMag);
                 watch.Stop();
                 Console.WriteLine($"Dictionary (value): {watch.ElapsedTicks} тіків");
+
+                //Immutable колекції
+                watch.Restart();
+                testCollections.FindInImmutableListKeys(currentKey);
+                watch.Stop();
+                Console.WriteLine($"ImmutableList<Edition>: {watch.ElapsedTicks} тіків");
+
+                watch.Restart();
+                testCollections.FindInImmutableListStrings(currentStrKey);
+                watch.Stop();
+                Console.WriteLine($"ImmutableList<string>: {watch.ElapsedTicks} тіків");
+
+                watch.Restart();
+                testCollections.FindInImmutableKeyValue(currentKey);
+                watch.Stop();
+                Console.WriteLine($"ImmutableDictionary<Edition, Magazine> (key): {watch.ElapsedTicks} тіків");
+
+                watch.Restart();
+                testCollections.FindInImmutableStringValue(currentMag);
+                watch.Stop();
+                Console.WriteLine($"ImmutableDictionary (value): {watch.ElapsedTicks} тіків");
+
+                //Sorted колекції
+                watch.Restart();
+                testCollections.FindInSortedListKeys(currentKey);
+                watch.Stop();
+                Console.WriteLine($"SortedList<Edition, Magazine> (key): {watch.ElapsedTicks} тіків");
+
+                watch.Restart();
+                testCollections.FindInSortedListStrings(currentStrKey);
+                watch.Stop();
+                Console.WriteLine($"SortedList<string, Magazine> (key): {watch.ElapsedTicks} тіків");
+
+                watch.Restart();
+                testCollections.FindInSortedDictKeyValue(currentKey);
+                watch.Stop();
+                Console.WriteLine($"SortedDictionary<Edition, Magazine> (key): {watch.ElapsedTicks} тіків");
+
+                watch.Restart();
+                testCollections.FindInSortedDictStringValue(currentMag);
+                watch.Stop();
+                Console.WriteLine($"SortedDictionary (value): {watch.ElapsedTicks} тіків");
             }
 
         }
