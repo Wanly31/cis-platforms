@@ -7,6 +7,10 @@ namespace Lab1
     {
         private readonly List<Magazine> magazineList;
 
+        public string Name { get; set; }
+        public event MagazineListHandler MagazineAdded;
+        public event MagazineListHandler MagazineReplaced;
+
         public MagazineCollection()
         {
             magazineList = new List<Magazine>();
@@ -14,10 +18,17 @@ namespace Lab1
 
         public void AddMagazines(params Magazine[] newMagazines)
         {
-            if(newMagazines != null)
+            foreach (var magazine in newMagazines)
             {
-                magazineList.AddRange(newMagazines);
+                if (magazine != null)
+                {
+                    magazineList.Add(magazine);
+                    var index = magazineList.Count - 1;
+                    MagazineAdded?.Invoke(this, new MagazineListHandlerEventArgs(Name, "Add", index));
+                }
             }
+
+
         }
 
         public void AddDefaults()
@@ -79,6 +90,18 @@ namespace Lab1
             .ToList();
         }
 
+        public bool Replace(int j, Magazine magazine)
+        {
+            if (j >= 0 && j < magazineList.Count)
+            {
+                magazineList[j] = magazine;
+
+                MagazineReplaced?.Invoke(this, new MagazineListHandlerEventArgs(Name, "Replace", j));
+                return true;
+            }
+            return false;
+        }
+
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
@@ -92,6 +115,21 @@ namespace Lab1
 
             return sb.ToString();
         }
+
+        //Індексатор
+        public Magazine this[int index]
+        {
+            get
+            {
+                return magazineList[index];
+            }
+            set
+            {
+                magazineList[index] = value;
+                MagazineReplaced?.Invoke(this, new MagazineListHandlerEventArgs(Name, "Replace", index));
+            }
+        }
+
 
         public virtual string ToShortString()
         {
