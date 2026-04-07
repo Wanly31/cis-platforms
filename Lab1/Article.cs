@@ -4,6 +4,7 @@ using System.Text;
 
 namespace Lab1
 {
+    [Serializable]
     public class Article : IRateAndCopy
     {
         public Person Author { get; set; }

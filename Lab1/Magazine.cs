@@ -1,8 +1,10 @@
 ﻿using System.Collections;
 using System.Text;
+using System.Text.Json;
 
 namespace Lab1
 {
+    [Serializable]
     public class Magazine : Edition, IRateAndCopy
     {
         private Frequency frequency;
@@ -80,22 +82,147 @@ namespace Lab1
             }
         }
 
-        public override object DeepCopy()
+        //JsonSerializer
+        public Magazine DeepCopy()
         {
-            Magazine copy = new Magazine(Title, ReleaseDate, Circulation, frequency);
-
-            if (editors != null)
+            using (var ms = new MemoryStream())
             {
-                foreach (Person e in editors)
-                    copy.editors.Add((Person)e.DeepCopy());
+                JsonSerializer.Serialize(ms, this);
+                ms.Position = 0;
+                return JsonSerializer.Deserialize<Magazine>(ms)
+                    ?? throw new Exception("Deserialization failed");
+            }
+        } 
+
+        public bool Save(string filename)
+        {
+            try
+            {
+                using (FileStream fstream = new FileStream(filename, FileMode.Create))
+                {
+                    JsonSerializer.Serialize(fstream, this);
+
+                    return true;
+                }
+            }
+            catch
+            {
+                return false;
             }
 
-            if (articles != null)
+        }
+
+        public bool Load(string filename)
+        {
+            try
             {
-                foreach (Article a in articles)
-                    copy.articles.Add((Article)a.DeepCopy());
+                using (FileStream fstream = new FileStream(filename, FileMode.Open))
+                {
+                    var deserialize = JsonSerializer.Deserialize<Magazine>(fstream);
+
+                    if (deserialize != null)
+                    {
+                        this.articles = deserialize.articles;
+                        this.circulation = deserialize.circulation;
+                        this.frequency = deserialize.frequency;
+                        this.editors = deserialize.editors;
+                        this.releaseDate = deserialize.releaseDate;
+                        this.title = deserialize.title;
+                        return true;
+                    }
+
+                    return false;
+                }
+
             }
-            return copy;
+            catch
+            {
+                return false;
+            }
+        }
+
+
+        public static bool Save(string filename, Magazine obj)
+        {
+            try
+            {
+                using (FileStream fstream = new FileStream(filename, FileMode.Create))
+                {
+                    JsonSerializer.Serialize(fstream, obj);
+
+                    return true;
+                }
+
+            }
+            catch
+            {
+                return false;
+            }
+            
+        }
+
+        public static bool Load(string filename, Magazine obj)
+        {
+            try
+            {
+                using(FileStream fstream = new FileStream(filename, FileMode.Open))
+                {
+                    var deserialize = JsonSerializer.Deserialize<Magazine>(fstream);
+                    if(deserialize != null)
+                    {
+                        obj.articles = deserialize.articles;
+                        obj.circulation = deserialize.circulation;
+                        obj.frequency = deserialize.frequency;
+                        obj.editors = deserialize.editors;
+                        obj.releaseDate = deserialize.releaseDate;
+                        obj.title = deserialize.title;
+                        return true;
+                    }
+                    return false;
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public bool AddFromConsole()
+        {
+            Console.WriteLine("Введіть (через |): Назва|Ім'я|Прізвище|Дата|Рейтинг");
+            var str = Console.ReadLine();
+
+            if(str != null)
+            {
+                var articleSplit = str.Split('|');
+
+                if(articleSplit.Length != 5)
+                {
+                    return false;
+                }
+
+                if (DateTime.TryParse(articleSplit[3], out DateTime birthDate) == false)
+                {
+                    return false;
+                }
+
+                if (double.TryParse(articleSplit[4], out double rating) == false)
+                {
+                    return false;
+                }
+
+                Person person = new Person(articleSplit[1], articleSplit[2], birthDate);
+                Article article = new Article(person, articleSplit[0], rating);
+
+                AddArticles(article);
+                
+                return true;
+
+            }
+
+
+            
+            return false;
         }
 
         public override string ToString()

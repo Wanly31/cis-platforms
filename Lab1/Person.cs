@@ -1,5 +1,6 @@
 ﻿namespace Lab1
 {
+    [Serializable]
     public class Person
     {
         public Person(string firstName, string lastName, DateTime birthDate)
