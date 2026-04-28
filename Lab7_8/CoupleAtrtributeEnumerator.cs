@@ -1,6 +1,6 @@
 using System.Collections;
 
-namespace Lab7_8;
+namespace Lab7;
 
 
 public class CoupleAttributeEnumerator : IEnumerator<CoupleAttribute>

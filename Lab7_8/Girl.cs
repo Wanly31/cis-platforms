@@ -1,4 +1,4 @@
-namespace Lab7_8;
+namespace Lab7;
 
 [Couple(Pair = "Student", Probability = 0.7, ChildType = "Girl")]
 [Couple(Pair = "Botan",   Probability = 0.3, ChildType = "SmartGirl")]
